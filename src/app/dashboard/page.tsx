@@ -11,10 +11,7 @@ const DEFAULT: EmailSettings = {
   greeting: "Hi {{name}},",
   body: `Thanks for connecting with the Neoflo team tonight. Hope the panel on AI, headcount, and the trade-offs ahead gave you something to work with.
 
-Quick recap on us: Neoflo runs finance operations end-to-end as a managed service. AP, reconciliation, month-end close. AI handles volume, specialists handle exceptions. SLA-backed, live in 4 weeks.
-
-If you haven't already, our ROI calculator shows what this saves for your finance team's specific headcount and invoice volume:`,
-  roiLink: "https://neoflo.ai/roi-calculator",
+Quick recap on us: Neoflo runs finance operations end-to-end as a managed service. AP, reconciliation, month-end close. AI handles volume, specialists handle exceptions. SLA-backed, live in 4 weeks.`,
   calendlyText: "We can scope what this looks like for your setup in 15 minutes:",
   calendlyLink: "https://calendly.com/your-link",
   websiteLink: "https://neoflo.ai",
@@ -169,16 +166,6 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
             <h2 className="font-semibold text-slate-800">Call-to-Action Links</h2>
             <div>
-              <Label hint='"Try it" outline button'>ROI Calculator Link</Label>
-              <input
-                value={settings.roiLink ?? ""}
-                onChange={set("roiLink")}
-                type="url"
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="https://neoflo.ai/roi-calculator"
-              />
-            </div>
-            <div>
               <Label hint='Text shown above the "Schedule a call" button'>Calendly Text</Label>
               <input
                 value={settings.calendlyText ?? ""}
@@ -284,7 +271,6 @@ function buildPreviewHtml(settings: EmailSettings): string {
     <div class="greeting">${greeting}</div>
     <div class="text">${body}</div>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0 24px;">
-      ${settings.roiLink ? `<tr><td align="center" style="padding-bottom:10px;"><a href="${settings.roiLink}" style="display:inline-block;background:#ffffff;color:#000000;text-decoration:none;padding:12px 24px;font-size:13px;font-weight:700;border:2px solid #000000;">Try it &rarr;</a></td></tr>` : ""}
       ${settings.calendlyLink ? `${settings.calendlyText ? `<tr><td align="center" style="padding-bottom:4px;font-size:13px;color:#333333;line-height:1.6;">${settings.calendlyText}</td></tr>` : ""}<tr><td align="center" style="padding-bottom:10px;"><a href="${settings.calendlyLink}" style="display:inline-block;background:#000000;color:#ffffff;text-decoration:none;padding:12px 24px;font-size:13px;font-weight:700;">Schedule a call &rarr;</a></td></tr>` : ""}
       ${settings.websiteLink ? `<tr><td align="center"><a href="${settings.websiteLink}" style="display:inline;color:#000000;font-weight:700;font-size:13px;text-decoration:underline;">neoflo.ai &rarr;</a></td></tr>` : ""}
     </table>

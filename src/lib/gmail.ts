@@ -62,7 +62,6 @@ function buildEmailHtml(contact: ContactInfo, settings: EmailSettings): string {
       <div class="greeting">${greeting}</div>
       <div class="text">${body}</div>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 28px;">
-        ${settings.roiLink ? `<tr><td align="center" style="padding-bottom:10px;"><a href="${settings.roiLink}" style="display:inline-block;background:#ffffff;color:#000000;text-decoration:none;padding:12px 32px;font-size:13px;font-weight:700;letter-spacing:0.5px;border:2px solid #000000;">Try it &rarr;</a></td></tr>` : ""}
         ${settings.calendlyLink ? `${settings.calendlyText ? `<tr><td align="center" style="padding-bottom:4px;font-size:14px;color:#333333;line-height:1.6;">${settings.calendlyText}</td></tr>` : ""}<tr><td align="center" style="padding-bottom:10px;"><a href="${settings.calendlyLink}" style="display:inline-block;background:#000000;color:#ffffff;text-decoration:none;padding:12px 32px;font-size:13px;font-weight:700;letter-spacing:0.5px;">Schedule a call &rarr;</a></td></tr>` : ""}
         ${settings.websiteLink ? `<tr><td align="center"><a href="${settings.websiteLink}" style="display:inline;color:#000000;font-weight:700;font-size:14px;text-decoration:underline;">neoflo.ai &rarr;</a></td></tr>` : ""}
       </table>

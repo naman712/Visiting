@@ -11,10 +11,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     greeting: "Hi {{name}},",
     body: `Thanks for connecting with the Neoflo team tonight. Hope the panel on AI, headcount, and the trade-offs ahead gave you something to work with.
 
-Quick recap on us: Neoflo runs finance operations end-to-end as a managed service. AP, reconciliation, month-end close. AI handles volume, specialists handle exceptions. SLA-backed, live in 4 weeks.
-
-If you haven't already, our ROI calculator shows what this saves for your finance team's specific headcount and invoice volume:`,
-    roiLink: "https://neoflo.ai/roi-calculator",
+Quick recap on us: Neoflo runs finance operations end-to-end as a managed service. AP, reconciliation, month-end close. AI handles volume, specialists handle exceptions. SLA-backed, live in 4 weeks.`,
     calendlyText: "We can scope what this looks like for your setup in 15 minutes:",
     calendlyLink: "https://calendly.com/your-link",
     websiteLink: "https://neoflo.ai",

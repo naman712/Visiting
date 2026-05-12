@@ -18,7 +18,6 @@ export interface EmailSettings {
   subject: string;
   greeting: string;
   body: string;
-  roiLink: string;
   calendlyText: string;
   calendlyLink: string;
   websiteLink: string;
