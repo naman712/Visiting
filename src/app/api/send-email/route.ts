@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const settings = customSettings ?? getSettings().email;
+    const settings = customSettings ?? (await getSettings()).email;
 
     // Send email
     await sendWelcomeEmail(contact, settings);

@@ -1,13 +1,15 @@
-import fs from "fs";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 import { AppSettings } from "@/types";
 
-const SETTINGS_PATH = path.join(process.cwd(), "data", "settings.json");
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 const DEFAULT_SETTINGS: AppSettings = {
   email: {
-    senderName: "Naman",
-    subject: "Great connecting tonight, {{name}}",
+    senderName: "Team Neoflo",
+    subject: "Welcome to Neoflo, {{name}}",
     greeting: "Hi {{name}},",
     body: `Thanks for connecting with the Neoflo team tonight. Hope the panel on AI, headcount, and the trade-offs ahead gave you something to work with.
 
@@ -15,25 +17,24 @@ Quick recap on us: Neoflo runs finance operations end-to-end as a managed servic
     calendlyText: "We can scope what this looks like for your setup in 15 minutes:",
     calendlyLink: "https://calendly.com/your-link",
     websiteLink: "https://neoflo.ai",
-    signature: `{{senderName}}
-Neoflo`,
+    signature: `{{senderName}}\nNeoflo`,
   },
 };
 
-export function getSettings(): AppSettings {
+export async function getSettings(): Promise<AppSettings> {
   try {
-    if (fs.existsSync(SETTINGS_PATH)) {
-      const raw = fs.readFileSync(SETTINGS_PATH, "utf-8");
-      return JSON.parse(raw);
-    }
+    const { data } = await supabase
+      .from("settings")
+      .select("email")
+      .eq("id", 1)
+      .single();
+    if (data?.email) return { email: data.email };
   } catch {
-    // Return defaults on error
+    // fall through to defaults
   }
   return DEFAULT_SETTINGS;
 }
 
-export function saveSettings(settings: AppSettings): void {
-  const dir = path.dirname(SETTINGS_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+export async function saveSettings(settings: AppSettings): Promise<void> {
+  await supabase.from("settings").upsert({ id: 1, email: settings.email });
 }
