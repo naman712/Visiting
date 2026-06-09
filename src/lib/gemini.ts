@@ -35,8 +35,10 @@ Do not include any explanation or markdown, just the raw JSON object.`;
   if (!jsonMatch) throw new Error("Could not extract JSON from Gemini response");
 
   const parsed = JSON.parse(jsonMatch[0]);
+  const fullName: string = parsed.name ?? "";
+  const firstName = fullName.trim().split(/\s+/)[0] ?? "";
   return {
-    name: parsed.name ?? "",
+    name: firstName,
     email: parsed.email ?? "",
     company: parsed.company ?? "",
     phone: parsed.phone ?? "",
