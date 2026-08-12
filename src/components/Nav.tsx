@@ -15,35 +15,44 @@ export default function Nav() {
 
   return (
     <>
-      {/* Top nav — desktop */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-black flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">N</span>
-            </div>
-            <span className="font-semibold text-slate-900">Neoflo</span>
-          </Link>
+      {/* Left sidebar — desktop */}
+      <aside className="hidden sm:flex flex-col w-56 shrink-0 border-r border-slate-200 bg-white h-screen sticky top-0 px-3 py-5">
+        <Link href="/" className="flex items-center gap-2 px-2 mb-6">
+          <div className="w-7 h-7 rounded-md bg-black flex items-center justify-center">
+            <span className="text-white font-semibold text-sm">N</span>
+          </div>
+          <span className="font-semibold text-slate-900">Neoflo</span>
+        </Link>
 
-          <nav className="hidden sm:flex items-center gap-1">
-            {links.map(({ href, label }) => {
-              const active = pathname === href;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-slate-100 text-slate-900"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+        <nav className="flex flex-col gap-1">
+          {links.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-slate-100 text-slate-900"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                }`}
+              >
+                <Icon size={18} strokeWidth={active ? 2.2 : 1.8} />
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Top bar — mobile only (brand) */}
+      <header className="sm:hidden sticky top-0 z-40 bg-white border-b border-slate-200 h-14 flex items-center px-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-black flex items-center justify-center">
+            <span className="text-white font-semibold text-sm">N</span>
+          </div>
+          <span className="font-semibold text-slate-900">Neoflo</span>
+        </Link>
       </header>
 
       {/* Bottom tab bar — mobile only */}
@@ -64,8 +73,6 @@ export default function Nav() {
           );
         })}
       </nav>
-
-      <div className="sm:hidden h-16" />
     </>
   );
 }
