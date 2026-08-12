@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ScanLine, LayoutDashboard, Users } from "lucide-react";
+import { ScanLine, Users, Settings } from "lucide-react";
 
 const links = [
-  { href: "/", label: "Scan Card", icon: ScanLine },
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Scan", icon: ScanLine },
   { href: "/contacts", label: "Contacts", icon: Users },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Nav() {
@@ -17,28 +17,27 @@ export default function Nav() {
     <>
       {/* Top nav — desktop */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">N</span>
+            <div className="w-7 h-7 rounded-md bg-black flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">N</span>
             </div>
-            <span className="font-bold text-slate-800 text-lg">Neoflo</span>
+            <span className="font-semibold text-slate-900">Neoflo</span>
           </Link>
 
           <nav className="hidden sm:flex items-center gap-1">
-            {links.map(({ href, label, icon: Icon }) => {
+            {links.map(({ href, label }) => {
               const active = pathname === href;
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     active
-                      ? "bg-indigo-50 text-indigo-700"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-slate-100 text-slate-900"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
-                  <Icon size={16} />
                   {label}
                 </Link>
               );
@@ -55,18 +54,17 @@ export default function Nav() {
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-medium transition-colors ${
-                active ? "text-indigo-700" : "text-slate-500"
+              className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-xs font-medium transition-colors ${
+                active ? "text-slate-900" : "text-slate-400"
               }`}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+              <Icon size={20} strokeWidth={active ? 2.2 : 1.7} />
               {label}
             </Link>
           );
         })}
       </nav>
 
-      {/* Spacer so content doesn't hide behind bottom tab bar on mobile */}
       <div className="sm:hidden h-16" />
     </>
   );

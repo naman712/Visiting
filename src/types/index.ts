@@ -12,9 +12,13 @@ export interface Contact extends ContactInfo {
   emailSent: boolean;
   hubspotId?: string;
   cardImageUrl?: string;
+  eventId?: string;
+  eventDateId?: string;
+  eventName?: string;
+  eventDateLabel?: string;
 }
 
-export interface EmailSettings {
+export interface EmailTemplate {
   subject: string;
   greeting: string;
   body: string;
@@ -25,6 +29,21 @@ export interface EmailSettings {
   signature: string;
 }
 
+export type EmailSettings = EmailTemplate;
+
+export interface EventDate {
+  id: string;
+  label: string;
+  date: string;
+}
+
+export interface EventConfig {
+  id: string;
+  name: string;
+  dates: EventDate[];
+  template: EmailTemplate;
+}
+
 export interface AppSettings {
-  email: EmailSettings;
+  events: EventConfig[];
 }

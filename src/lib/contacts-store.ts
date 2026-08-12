@@ -37,6 +37,10 @@ function contactToRow(c: Contact) {
     email_sent: c.emailSent,
     hubspot_id: c.hubspotId ?? null,
     card_image_url: c.cardImageUrl ?? null,
+    event_id: c.eventId ?? null,
+    event_date_id: c.eventDateId ?? null,
+    event_name: c.eventName ?? null,
+    event_date_label: c.eventDateLabel ?? null,
   };
 }
 
@@ -52,5 +56,9 @@ function rowToContact(row: Record<string, unknown>): Contact {
     emailSent: row.email_sent as boolean,
     hubspotId: row.hubspot_id as string | undefined,
     cardImageUrl: row.card_image_url as string | undefined,
+    eventId: row.event_id as string | undefined,
+    eventDateId: row.event_date_id as string | undefined,
+    eventName: row.event_name as string | undefined,
+    eventDateLabel: row.event_date_label as string | undefined,
   };
 }

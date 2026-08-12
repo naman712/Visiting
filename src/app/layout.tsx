@@ -14,15 +14,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-slate-50">
+      <body className="min-h-full flex flex-col bg-white">
         <Nav />
         <main className="flex-1">{children}</main>
         <Toaster
-          position="top-right"
+          position="top-center"
           toastOptions={{
-            style: { borderRadius: "8px", fontFamily: "var(--font-geist-sans)" },
-            success: { style: { background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0" } },
-            error: { style: { background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca" } },
+            style: {
+              borderRadius: "8px",
+              fontFamily: "var(--font-geist-sans)",
+              background: "#0f172a",
+              color: "#ffffff",
+              fontSize: "14px",
+            },
           }}
         />
       </body>

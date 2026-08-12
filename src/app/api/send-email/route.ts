@@ -10,18 +10,27 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const contact: ContactInfo = body.contact;
-    const customSettings = body.settings; // optional per-send override
+    const eventId: string | undefined = body.eventId;
+    const eventDateId: string | undefined = body.eventDateId;
 
-    if (!contact.email) {
+    if (!contact?.email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const settings = customSettings ?? (await getSettings()).email;
+    const settings = await getSettings();
+    const event =
+      settings.events.find((e) => e.id === eventId) ?? settings.events[0];
 
-    // Send email
-    await sendWelcomeEmail(contact, settings);
+    if (!event) {
+      return NextResponse.json({ error: "No event configured" }, { status: 400 });
+    }
 
-    // Create HubSpot contact
+    const eventDate = event.dates.find((d) => d.id === eventDateId);
+
+    // Send email using the event's template
+    await sendWelcomeEmail(contact, event.template);
+
+    // Create HubSpot contact (non-fatal)
     let hubspotId: string | undefined;
     try {
       hubspotId = await createOrUpdateHubspotContact(contact);
@@ -36,6 +45,10 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
       emailSent: true,
       hubspotId,
+      eventId: event.id,
+      eventDateId: eventDate?.id,
+      eventName: event.name,
+      eventDateLabel: eventDate?.label,
     };
     await saveContact(record);
 
