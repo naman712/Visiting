@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Plus, Trash2, ChevronDown, Loader2 } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Loader2, Eye, X } from "lucide-react";
 import { AppSettings, EventConfig, EmailTemplate } from "@/types";
+import { buildEmailHtml } from "@/lib/email-template";
 
 const BLANK_TEMPLATE: EmailTemplate = {
   senderName: "Team Neoflo",
@@ -49,6 +50,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [openEvent, setOpenEvent] = useState<string | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -287,9 +289,17 @@ export default function SettingsPage() {
                   <div className="h-px bg-slate-100" />
 
                   {/* Template */}
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-                    Email Template
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                      Email Template
+                    </p>
+                    <button
+                      onClick={() => setPreviewTemplate(event.template)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 border border-slate-200 rounded-md text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      <Eye size={14} /> Preview email
+                    </button>
+                  </div>
                   <p className="text-xs text-slate-400 -mt-3">
                     Use {"{{name}}"} and {"{{company}}"} as placeholders.
                   </p>
@@ -383,6 +393,43 @@ export default function SettingsPage() {
       >
         <Plus size={15} /> Add event
       </button>
+
+      {/* Email preview modal */}
+      {previewTemplate && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+          onClick={() => setPreviewTemplate(null)}
+        >
+          <div
+            className="bg-white rounded-lg w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Email preview</p>
+                <p className="text-xs text-slate-400">
+                  Subject: {previewTemplate.subject.replace(/\{\{name\}\}/g, "John")}
+                </p>
+              </div>
+              <button
+                onClick={() => setPreviewTemplate(null)}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <iframe
+              title="Email preview"
+              className="flex-1 w-full border-0 bg-slate-100"
+              style={{ minHeight: "480px" }}
+              srcDoc={buildEmailHtml(
+                { name: "John Smith", email: "john@acme.com", company: "Acme Inc." },
+                previewTemplate
+              )}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
