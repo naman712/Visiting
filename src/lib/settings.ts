@@ -1,10 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { getDb } from "./firebase";
 import { AppSettings, EmailTemplate } from "@/types";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 const DEFAULT_TEMPLATE: EmailTemplate = {
   senderName: "Team Neoflo",
@@ -33,30 +28,17 @@ const DEFAULT_SETTINGS: AppSettings = {
   ],
 };
 
+// Single Firestore doc that holds all app settings.
+const SETTINGS_DOC = "settings/app";
+
 export async function getSettings(): Promise<AppSettings> {
   try {
-    const { data } = await supabase
-      .from("settings")
-      .select("events, email")
-      .eq("id", 1)
-      .single();
+    const db = getDb();
+    const snap = await db.doc(SETTINGS_DOC).get();
+    const data = snap.data();
 
     if (data?.events && Array.isArray(data.events) && data.events.length > 0) {
       return { events: data.events };
-    }
-
-    // Migration path: wrap the old flat email template as the first event
-    if (data?.email) {
-      return {
-        events: [
-          {
-            id: "default",
-            name: "Default Event",
-            dates: [],
-            template: { ...DEFAULT_TEMPLATE, ...(data.email as EmailTemplate) },
-          },
-        ],
-      };
     }
   } catch {
     // fall through to defaults
@@ -65,5 +47,6 @@ export async function getSettings(): Promise<AppSettings> {
 }
 
 export async function saveSettings(settings: AppSettings): Promise<void> {
-  await supabase.from("settings").upsert({ id: 1, events: settings.events });
+  const db = getDb();
+  await db.doc(SETTINGS_DOC).set({ events: settings.events });
 }

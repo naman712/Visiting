@@ -1,31 +1,20 @@
-import { createClient } from "@supabase/supabase-js";
+import { getDb } from "./firebase";
 import { Contact } from "@/types";
 
-function getClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
+const COLLECTION = "contacts";
 
 export async function getAllContacts(): Promise<Contact[]> {
-  const supabase = getClient();
-  const { data, error } = await supabase
-    .from("contacts")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) throw new Error(error.message);
-  return (data ?? []).map(rowToContact);
+  const db = getDb();
+  const snap = await db.collection(COLLECTION).orderBy("createdAt", "desc").get();
+  return snap.docs.map((d) => docToContact(d.data()));
 }
 
 export async function saveContact(contact: Contact): Promise<void> {
-  const supabase = getClient();
-  const { error } = await supabase.from("contacts").upsert(contactToRow(contact));
-  if (error) throw new Error(error.message);
+  const db = getDb();
+  await db.collection(COLLECTION).doc(contact.id).set(contactToDoc(contact));
 }
 
-function contactToRow(c: Contact) {
+function contactToDoc(c: Contact) {
   return {
     id: c.id,
     name: c.name,
@@ -33,32 +22,32 @@ function contactToRow(c: Contact) {
     company: c.company,
     phone: c.phone ?? null,
     title: c.title ?? null,
-    created_at: c.createdAt,
-    email_sent: c.emailSent,
-    hubspot_id: c.hubspotId ?? null,
-    card_image_url: c.cardImageUrl ?? null,
-    event_id: c.eventId ?? null,
-    event_date_id: c.eventDateId ?? null,
-    event_name: c.eventName ?? null,
-    event_date_label: c.eventDateLabel ?? null,
+    createdAt: c.createdAt,
+    emailSent: c.emailSent,
+    hubspotId: c.hubspotId ?? null,
+    cardImageUrl: c.cardImageUrl ?? null,
+    eventId: c.eventId ?? null,
+    eventDateId: c.eventDateId ?? null,
+    eventName: c.eventName ?? null,
+    eventDateLabel: c.eventDateLabel ?? null,
   };
 }
 
-function rowToContact(row: Record<string, unknown>): Contact {
+function docToContact(row: Record<string, unknown>): Contact {
   return {
     id: row.id as string,
     name: row.name as string,
     email: row.email as string,
     company: row.company as string,
-    phone: row.phone as string | undefined,
-    title: row.title as string | undefined,
-    createdAt: row.created_at as string,
-    emailSent: row.email_sent as boolean,
-    hubspotId: row.hubspot_id as string | undefined,
-    cardImageUrl: row.card_image_url as string | undefined,
-    eventId: row.event_id as string | undefined,
-    eventDateId: row.event_date_id as string | undefined,
-    eventName: row.event_name as string | undefined,
-    eventDateLabel: row.event_date_label as string | undefined,
+    phone: (row.phone as string) ?? undefined,
+    title: (row.title as string) ?? undefined,
+    createdAt: row.createdAt as string,
+    emailSent: row.emailSent as boolean,
+    hubspotId: (row.hubspotId as string) ?? undefined,
+    cardImageUrl: (row.cardImageUrl as string) ?? undefined,
+    eventId: (row.eventId as string) ?? undefined,
+    eventDateId: (row.eventDateId as string) ?? undefined,
+    eventName: (row.eventName as string) ?? undefined,
+    eventDateLabel: (row.eventDateLabel as string) ?? undefined,
   };
 }

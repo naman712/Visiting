@@ -30,10 +30,13 @@ export async function POST(req: NextRequest) {
     // Send email using the event's template
     await sendWelcomeEmail(contact, event.template);
 
-    // Create HubSpot contact (non-fatal)
+    // Create HubSpot contact, tagged with the event name (non-fatal)
+    const eventTag = eventDate?.label
+      ? `${event.name} — ${eventDate.label}`
+      : event.name;
     let hubspotId: string | undefined;
     try {
-      hubspotId = await createOrUpdateHubspotContact(contact);
+      hubspotId = await createOrUpdateHubspotContact(contact, eventTag);
     } catch (err) {
       console.error("HubSpot error (non-fatal):", err);
     }
