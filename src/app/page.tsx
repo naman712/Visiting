@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
 import { Upload, Send, Loader2, CheckCircle2, X, Camera, Image as ImageIcon } from "lucide-react";
 import { ContactInfo, EventConfig } from "@/types";
+import { buildEmailHtml } from "@/lib/email-template";
 
 const EMPTY_CONTACT: ContactInfo = { name: "", email: "", company: "", phone: "", title: "" };
 
@@ -291,22 +292,35 @@ export default function ScanPage() {
 
         {/* Email preview */}
         {template && (
-          <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Email preview</p>
-            <div className="space-y-2 text-sm">
-              <p>
-                <span className="text-slate-400">Subject: </span>
-                <span className="text-slate-900">{template.subject.replace(/\{\{name\}\}/g, contact.name || "there")}</span>
-              </p>
-              <p className="text-slate-700">{template.greeting.replace(/\{\{name\}\}/g, contact.name || "there")}</p>
-              <p className="text-slate-500 text-xs whitespace-pre-line leading-relaxed">
-                {template.body
-                  .replace(/\{\{name\}\}/g, contact.name || "there")
-                  .replace(/\{\{company\}\}/g, contact.company || "your company")
-                  .slice(0, 240)}
-                {template.body.length > 240 ? "…" : ""}
+          <div className="border border-slate-200 rounded-lg bg-slate-50 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Email preview</p>
+              <p className="text-xs text-slate-400 truncate ml-3">
+                Subject: {template.subject.replace(/\{\{name\}\}/g, contact.name || "there")}
               </p>
             </div>
+            {template.customHtml ? (
+              <iframe
+                title="Email preview"
+                className="w-full border-0 bg-white"
+                style={{ height: "360px" }}
+                srcDoc={buildEmailHtml(
+                  { ...contact, name: contact.name || "there" },
+                  template
+                )}
+              />
+            ) : (
+              <div className="space-y-2 text-sm px-4 pb-4">
+                <p className="text-slate-700">{template.greeting.replace(/\{\{name\}\}/g, contact.name || "there")}</p>
+                <p className="text-slate-500 text-xs whitespace-pre-line leading-relaxed">
+                  {template.body
+                    .replace(/\{\{name\}\}/g, contact.name || "there")
+                    .replace(/\{\{company\}\}/g, contact.company || "your company")
+                    .slice(0, 240)}
+                  {template.body.length > 240 ? "…" : ""}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
