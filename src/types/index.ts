@@ -27,6 +27,12 @@ export interface EmailTemplate {
   websiteLink: string;
   senderName: string;
   signature: string;
+  /**
+   * Optional uploaded HTML that fully replaces the built-in email layout.
+   * Placeholders {{name}}, {{company}}, {{senderName}} etc. are still applied.
+   * When empty/undefined, the built-in template is used.
+   */
+  customHtml?: string;
 }
 
 export type EmailSettings = EmailTemplate;

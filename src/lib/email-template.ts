@@ -14,6 +14,27 @@ export function buildEmailHtml(contact: ContactInfo, template: EmailTemplate): s
   const signature = template.signature.replace(/\{\{senderName\}\}/g, template.senderName);
   const year = new Date().getFullYear();
 
+  // If the user uploaded a custom HTML template, use it verbatim with
+  // placeholders substituted, instead of the built-in layout.
+  if (template.customHtml && template.customHtml.trim()) {
+    return template.customHtml
+      .replace(/\{\{name\}\}/g, firstName)
+      .replace(/\{\{fullName\}\}/g, contact.name || firstName)
+      .replace(/\{\{company\}\}/g, contact.company || "your company")
+      .replace(/\{\{email\}\}/g, contact.email || "")
+      .replace(/\{\{title\}\}/g, contact.title || "")
+      .replace(/\{\{phone\}\}/g, contact.phone || "")
+      .replace(/\{\{senderName\}\}/g, template.senderName)
+      .replace(/\{\{subject\}\}/g, template.subject.replace(/\{\{name\}\}/g, firstName))
+      .replace(/\{\{greeting\}\}/g, greeting)
+      .replace(/\{\{body\}\}/g, body)
+      .replace(/\{\{signature\}\}/g, signature)
+      .replace(/\{\{calendlyText\}\}/g, template.calendlyText || "")
+      .replace(/\{\{calendlyLink\}\}/g, template.calendlyLink || "")
+      .replace(/\{\{websiteLink\}\}/g, template.websiteLink || "")
+      .replace(/\{\{year\}\}/g, String(year));
+  }
+
   return `<!DOCTYPE html>
 <html>
 <head>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Plus, Trash2, ChevronDown, Loader2, Eye, X } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Loader2, Eye, X, Upload, FileCode } from "lucide-react";
 import { AppSettings, EventConfig, EmailTemplate } from "@/types";
 import { buildEmailHtml } from "@/lib/email-template";
 
@@ -163,6 +163,24 @@ export default function SettingsPage() {
     );
   }
 
+  async function handleHtmlUpload(eventId: string, file: File) {
+    if (!/\.html?$/i.test(file.name) && file.type !== "text/html") {
+      toast.error("Please upload a .html file");
+      return;
+    }
+    if (file.size > 500_000) {
+      toast.error("File too large (max 500 KB)");
+      return;
+    }
+    try {
+      const text = await file.text();
+      updateTemplate(eventId, { customHtml: text });
+      toast.success("HTML template loaded — remember to Save");
+    } catch {
+      toast.error("Could not read file");
+    }
+  }
+
   async function handleSave() {
     if (!settings) return;
     setSaving(true);
@@ -303,6 +321,72 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-400 -mt-3">
                     Use {"{{name}}"} and {"{{company}}"} as placeholders.
                   </p>
+
+                  {/* Custom HTML upload */}
+                  <div className="border border-slate-200 rounded-md p-3 bg-slate-50/50">
+                    {event.template.customHtml ? (
+                      <div className="flex items-start gap-3">
+                        <FileCode size={18} className="text-slate-500 mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-800">
+                            Custom HTML template active
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            {event.template.customHtml.length.toLocaleString()} characters.
+                            The fields below are ignored except where you reference
+                            placeholders like {"{{body}}"}.
+                          </p>
+                          <div className="flex items-center gap-3 mt-2">
+                            <label className="text-xs font-medium text-slate-700 hover:text-slate-900 cursor-pointer underline">
+                              Replace file
+                              <input
+                                type="file"
+                                accept=".html,text/html"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) handleHtmlUpload(event.id, f);
+                                  e.target.value = "";
+                                }}
+                              />
+                            </label>
+                            <button
+                              onClick={() =>
+                                updateTemplate(event.id, { customHtml: undefined })
+                              }
+                              className="text-xs font-medium text-red-500 hover:text-red-600"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-slate-700">
+                            Upload HTML template
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            Optional — replaces the built-in layout with your own HTML.
+                          </p>
+                        </div>
+                        <label className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-md text-xs font-medium text-slate-700 hover:bg-white cursor-pointer shrink-0">
+                          <Upload size={14} /> Upload .html
+                          <input
+                            type="file"
+                            accept=".html,text/html"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleHtmlUpload(event.id, f);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
 
                   <Field label="Sender name">
                     <input
