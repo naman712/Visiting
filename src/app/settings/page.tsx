@@ -1,10 +1,65 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { Plus, Trash2, ChevronDown, Loader2, Eye, X, Upload, FileCode } from "lucide-react";
 import { AppSettings, EventConfig, EmailTemplate } from "@/types";
 import { buildEmailHtml } from "@/lib/email-template";
+
+/**
+ * Renders an HTML email in an editable iframe (WYSIWYG). The email shows as it
+ * looks; clicking into it lets the user edit the text directly. Tags and styling
+ * are preserved — only the visible content changes. Emits the full HTML on edit.
+ */
+function HtmlContentEditor({
+  html,
+  onChange,
+}: {
+  html: string;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLIFrameElement>(null);
+  const lastEmitted = useRef<string>("");
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    const iframe = ref.current;
+    if (!iframe) return;
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+
+    // Only rewrite the document when the HTML changed externally (upload/replace),
+    // not for edits we produced ourselves — that keeps the caret in place.
+    if (html !== lastEmitted.current) {
+      doc.open();
+      doc.write(html || "<p></p>");
+      doc.close();
+      doc.body.contentEditable = "true";
+      doc.body.style.outline = "none";
+      doc.body.style.cursor = "text";
+      lastEmitted.current = html;
+    }
+
+    // Always (re)attach the input listener to the current document.
+    const handler = () => {
+      const full = "<!DOCTYPE html>" + doc.documentElement.outerHTML;
+      lastEmitted.current = full;
+      onChangeRef.current(full);
+    };
+    doc.addEventListener("input", handler);
+    return () => doc.removeEventListener("input", handler);
+  }, [html]);
+
+  return (
+    <iframe
+      ref={ref}
+      title="Edit email content"
+      className="w-full border border-slate-200 rounded-md bg-white"
+      style={{ height: 360 }}
+    />
+  );
+}
 
 const BLANK_TEMPLATE: EmailTemplate = {
   senderName: "Team Neoflo",
@@ -416,17 +471,14 @@ export default function SettingsPage() {
                   </Field>
                   {event.template.customHtml ? (
                     <Field
-                      label="Body (HTML)"
-                      hint="the full email — edit freely; {{name}} / {{company}} fill in per contact"
+                      label="Body"
+                      hint="click in and edit the text; {{name}} / {{company}} fill in per contact"
                     >
-                      <textarea
-                        value={event.template.customHtml}
-                        onChange={(e) =>
-                          updateTemplate(event.id, { customHtml: e.target.value })
+                      <HtmlContentEditor
+                        html={event.template.customHtml}
+                        onChange={(v) =>
+                          updateTemplate(event.id, { customHtml: v })
                         }
-                        rows={16}
-                        spellCheck={false}
-                        className={`${inputCls} resize-y font-mono text-xs leading-relaxed`}
                       />
                     </Field>
                   ) : (
