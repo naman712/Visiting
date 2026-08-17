@@ -10,7 +10,7 @@ export default function ContactsPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/contacts")
+    fetch("/api/contacts", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => { setContacts(data); setLoading(false); })
       .catch(() => setLoading(false));

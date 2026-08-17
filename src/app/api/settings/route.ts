@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSettings, saveSettings } from "@/lib/settings";
 
+// Always read live from Firestore — never serve a cached/build-time snapshot.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const settings = await getSettings();

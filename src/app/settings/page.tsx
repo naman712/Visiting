@@ -129,7 +129,7 @@ export default function SettingsPage() {
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   useEffect(() => {
-    fetch("/api/settings")
+    fetch("/api/settings", { cache: "no-store" })
       .then((r) => r.json())
       .then((data: AppSettings) => {
         setSettings(data);
