@@ -406,64 +406,73 @@ export default function SettingsPage() {
                       className={inputCls}
                     />
                   </Field>
-                  <Field label="Greeting">
-                    <input
-                      value={event.template.greeting}
-                      onChange={(e) =>
-                        updateTemplate(event.id, { greeting: e.target.value })
-                      }
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="Body">
-                    <textarea
-                      value={event.template.body}
-                      onChange={(e) =>
-                        updateTemplate(event.id, { body: e.target.value })
-                      }
-                      rows={7}
-                      className={`${inputCls} resize-y`}
-                    />
-                  </Field>
-                  <Field label="Calendly text" hint="line above the button">
-                    <input
-                      value={event.template.calendlyText}
-                      onChange={(e) =>
-                        updateTemplate(event.id, { calendlyText: e.target.value })
-                      }
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="Calendly link">
-                    <input
-                      value={event.template.calendlyLink}
-                      onChange={(e) =>
-                        updateTemplate(event.id, { calendlyLink: e.target.value })
-                      }
-                      className={inputCls}
-                      placeholder="https://..."
-                    />
-                  </Field>
-                  <Field label="Website link">
-                    <input
-                      value={event.template.websiteLink}
-                      onChange={(e) =>
-                        updateTemplate(event.id, { websiteLink: e.target.value })
-                      }
-                      className={inputCls}
-                      placeholder="https://neoflo.ai"
-                    />
-                  </Field>
-                  <Field label="Signature">
-                    <textarea
-                      value={event.template.signature}
-                      onChange={(e) =>
-                        updateTemplate(event.id, { signature: e.target.value })
-                      }
-                      rows={2}
-                      className={`${inputCls} resize-y`}
-                    />
-                  </Field>
+                  {event.template.customHtml ? (
+                    <p className="text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-md px-3 py-2">
+                      Greeting, body, links, and signature come from your uploaded
+                      HTML template. Remove the template to edit these fields here.
+                    </p>
+                  ) : (
+                    <>
+                      <Field label="Greeting">
+                        <input
+                          value={event.template.greeting}
+                          onChange={(e) =>
+                            updateTemplate(event.id, { greeting: e.target.value })
+                          }
+                          className={inputCls}
+                        />
+                      </Field>
+                      <Field label="Body">
+                        <textarea
+                          value={event.template.body}
+                          onChange={(e) =>
+                            updateTemplate(event.id, { body: e.target.value })
+                          }
+                          rows={7}
+                          className={`${inputCls} resize-y`}
+                        />
+                      </Field>
+                      <Field label="Calendly text" hint="line above the button">
+                        <input
+                          value={event.template.calendlyText}
+                          onChange={(e) =>
+                            updateTemplate(event.id, { calendlyText: e.target.value })
+                          }
+                          className={inputCls}
+                        />
+                      </Field>
+                      <Field label="Calendly link">
+                        <input
+                          value={event.template.calendlyLink}
+                          onChange={(e) =>
+                            updateTemplate(event.id, { calendlyLink: e.target.value })
+                          }
+                          className={inputCls}
+                          placeholder="https://..."
+                        />
+                      </Field>
+                      <Field label="Website link">
+                        <input
+                          value={event.template.websiteLink}
+                          onChange={(e) =>
+                            updateTemplate(event.id, { websiteLink: e.target.value })
+                          }
+                          className={inputCls}
+                          placeholder="https://neoflo.ai"
+                        />
+                      </Field>
+                      <Field label="Signature">
+                        <textarea
+                          value={event.template.signature}
+                          onChange={(e) =>
+                            updateTemplate(event.id, { signature: e.target.value })
+                          }
+                          rows={2}
+                          className={`${inputCls} resize-y`}
+                        />
+                      </Field>
+                    </>
+                  )}
                 </div>
               )}
             </div>
