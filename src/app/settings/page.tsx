@@ -23,6 +23,82 @@ function newId() {
     : Math.random().toString(36).slice(2);
 }
 
+/**
+ * Parse an uploaded HTML email into editable parts.
+ * Detects the greeting, body, and signature blocks, replaces them in the HTML
+ * with {{greeting}}, {{body}}, {{signature}} placeholders, and returns both the
+ * placeholder-ified HTML and the extracted text so the fields can be edited.
+ */
+function parseHtmlTemplate(html: string): {
+  html: string;
+  greeting: string;
+  body: string;
+  signature: string;
+} {
+  try {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const root = doc.body;
+
+    // Leaf text blocks — block elements that contain text but no nested blocks.
+    const blockSel = "h1,h2,h3,h4,h5,h6,p,div,td,li,span";
+    const blocks = Array.from(root.querySelectorAll(blockSel)).filter(
+      (el) =>
+        (el.textContent || "").trim().length > 0 &&
+        !el.querySelector(blockSel)
+    ) as HTMLElement[];
+
+    if (blocks.length === 0) {
+      return { html, greeting: "", body: "", signature: "" };
+    }
+
+    const textOf = (el: HTMLElement) =>
+      (el.innerText || el.textContent || "").replace(/\s+\n/g, "\n").trim();
+
+    // Greeting: first block that looks like a salutation, else the first block.
+    let gIdx = blocks.findIndex((el) =>
+      /^(hi|hello|hey|dear)\b/i.test(textOf(el))
+    );
+    if (gIdx === -1) gIdx = 0;
+
+    // Signature: last block that looks like a sign-off (after greeting).
+    let sIdx = -1;
+    for (let i = blocks.length - 1; i > gIdx; i--) {
+      if (
+        /(regards|thanks|thank you|best|cheers|sincerely|team|warm)/i.test(
+          textOf(blocks[i])
+        )
+      ) {
+        sIdx = i;
+        break;
+      }
+    }
+
+    const bodyEnd = sIdx === -1 ? blocks.length : sIdx;
+    const bodyBlocks = blocks.slice(gIdx + 1, bodyEnd);
+
+    const greeting = textOf(blocks[gIdx]);
+    const body = bodyBlocks.map(textOf).filter(Boolean).join("\n\n");
+    const signature = sIdx === -1 ? "" : textOf(blocks[sIdx]);
+
+    // Inject placeholders back into the HTML.
+    blocks[gIdx].textContent = "{{greeting}}";
+    if (bodyBlocks.length > 0) {
+      bodyBlocks[0].textContent = "{{body}}";
+      bodyBlocks.slice(1).forEach((el) => el.remove());
+    }
+    if (sIdx !== -1) blocks[sIdx].textContent = "{{signature}}";
+
+    return {
+      html: "<!DOCTYPE html>" + doc.documentElement.outerHTML,
+      greeting,
+      body,
+      signature,
+    };
+  } catch {
+    return { html, greeting: "", body: "", signature: "" };
+  }
+}
+
 function Field({
   label,
   hint,
@@ -174,8 +250,14 @@ export default function SettingsPage() {
     }
     try {
       const text = await file.text();
-      updateTemplate(eventId, { customHtml: text });
-      toast.success("HTML template loaded — remember to Save");
+      const parsed = parseHtmlTemplate(text);
+      updateTemplate(eventId, {
+        customHtml: parsed.html,
+        greeting: parsed.greeting || "Hi {{name}},",
+        body: parsed.body,
+        signature: parsed.signature || "{{senderName}}",
+      });
+      toast.success("Template loaded — edit the fields, then Save");
     } catch {
       toast.error("Could not read file");
     }
@@ -406,32 +488,35 @@ export default function SettingsPage() {
                       className={inputCls}
                     />
                   </Field>
-                  {event.template.customHtml ? (
-                    <p className="text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-md px-3 py-2">
-                      Greeting, body, links, and signature come from your uploaded
-                      HTML template. Remove the template to edit these fields here.
+                  {event.template.customHtml && (
+                    <p className="text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-md px-3 py-2">
+                      These fields were auto-filled from your template. Edit them and
+                      add placeholders like {"{{name}}"} — they map to {"{{greeting}}"},{" "}
+                      {"{{body}}"}, {"{{signature}}"} in your HTML.
                     </p>
-                  ) : (
+                  )}
+
+                  <Field label="Greeting">
+                    <input
+                      value={event.template.greeting}
+                      onChange={(e) =>
+                        updateTemplate(event.id, { greeting: e.target.value })
+                      }
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label="Body">
+                    <textarea
+                      value={event.template.body}
+                      onChange={(e) =>
+                        updateTemplate(event.id, { body: e.target.value })
+                      }
+                      rows={7}
+                      className={`${inputCls} resize-y`}
+                    />
+                  </Field>
+                  {!event.template.customHtml && (
                     <>
-                      <Field label="Greeting">
-                        <input
-                          value={event.template.greeting}
-                          onChange={(e) =>
-                            updateTemplate(event.id, { greeting: e.target.value })
-                          }
-                          className={inputCls}
-                        />
-                      </Field>
-                      <Field label="Body">
-                        <textarea
-                          value={event.template.body}
-                          onChange={(e) =>
-                            updateTemplate(event.id, { body: e.target.value })
-                          }
-                          rows={7}
-                          className={`${inputCls} resize-y`}
-                        />
-                      </Field>
                       <Field label="Calendly text" hint="line above the button">
                         <input
                           value={event.template.calendlyText}
@@ -461,18 +546,18 @@ export default function SettingsPage() {
                           placeholder="https://neoflo.ai"
                         />
                       </Field>
-                      <Field label="Signature">
-                        <textarea
-                          value={event.template.signature}
-                          onChange={(e) =>
-                            updateTemplate(event.id, { signature: e.target.value })
-                          }
-                          rows={2}
-                          className={`${inputCls} resize-y`}
-                        />
-                      </Field>
                     </>
                   )}
+                  <Field label="Signature">
+                    <textarea
+                      value={event.template.signature}
+                      onChange={(e) =>
+                        updateTemplate(event.id, { signature: e.target.value })
+                      }
+                      rows={2}
+                      className={`${inputCls} resize-y`}
+                    />
+                  </Field>
                 </div>
               )}
             </div>

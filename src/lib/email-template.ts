@@ -17,6 +17,8 @@ export function buildEmailHtml(contact: ContactInfo, template: EmailTemplate): s
   // If the user uploaded a custom HTML template, use it verbatim with
   // placeholders substituted, instead of the built-in layout.
   if (template.customHtml && template.customHtml.trim()) {
+    // Inside HTML, newlines must become <br> to render as line breaks.
+    const br = (s: string) => s.replace(/\n/g, "<br>");
     return template.customHtml
       .replace(/\{\{name\}\}/g, firstName)
       .replace(/\{\{fullName\}\}/g, contact.name || firstName)
@@ -26,9 +28,9 @@ export function buildEmailHtml(contact: ContactInfo, template: EmailTemplate): s
       .replace(/\{\{phone\}\}/g, contact.phone || "")
       .replace(/\{\{senderName\}\}/g, template.senderName)
       .replace(/\{\{subject\}\}/g, template.subject.replace(/\{\{name\}\}/g, firstName))
-      .replace(/\{\{greeting\}\}/g, greeting)
-      .replace(/\{\{body\}\}/g, body)
-      .replace(/\{\{signature\}\}/g, signature)
+      .replace(/\{\{greeting\}\}/g, br(greeting))
+      .replace(/\{\{body\}\}/g, br(body))
+      .replace(/\{\{signature\}\}/g, br(signature))
       .replace(/\{\{calendlyText\}\}/g, template.calendlyText || "")
       .replace(/\{\{calendlyLink\}\}/g, template.calendlyLink || "")
       .replace(/\{\{websiteLink\}\}/g, template.websiteLink || "")
