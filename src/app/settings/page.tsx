@@ -374,7 +374,10 @@ export default function SettingsPage() {
                   <Field label="Dates" hint="optional — leave empty if no dates">
                     <div className="space-y-2">
                       {event.dates.map((d) => (
-                        <div key={d.id} className="flex items-center gap-2">
+                        <div
+                          key={d.id}
+                          className="flex flex-col sm:flex-row sm:items-center gap-2"
+                        >
                           <input
                             value={d.label}
                             onChange={(e) =>
@@ -383,20 +386,22 @@ export default function SettingsPage() {
                             className={inputCls}
                             placeholder="Label (e.g. Day 1)"
                           />
-                          <input
-                            type="date"
-                            value={d.date}
-                            onChange={(e) =>
-                              updateDate(event.id, d.id, { date: e.target.value })
-                            }
-                            className="px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
-                          />
-                          <button
-                            onClick={() => removeDate(event.id, d.id)}
-                            className="shrink-0 text-slate-300 hover:text-red-500"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="date"
+                              value={d.date}
+                              onChange={(e) =>
+                                updateDate(event.id, d.id, { date: e.target.value })
+                              }
+                              className="flex-1 sm:flex-none px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                            />
+                            <button
+                              onClick={() => removeDate(event.id, d.id)}
+                              className="shrink-0 text-slate-300 hover:text-red-500 p-1"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </div>
                       ))}
                       <button
