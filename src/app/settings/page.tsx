@@ -60,25 +60,44 @@ function parseHtmlTemplate(html: string): {
     );
     if (gIdx === -1) gIdx = 0;
 
-    // Signature: last block that looks like a sign-off (after greeting).
-    let sIdx = -1;
-    for (let i = blocks.length - 1; i > gIdx; i--) {
-      if (
-        /(regards|thanks|thank you|best|cheers|sincerely|team|warm)/i.test(
-          textOf(blocks[i])
-        )
-      ) {
-        sIdx = i;
+    // Signature: find where the sign-off begins (everything after it is signature).
+    const SIGN_OFF =
+      /\b(regards|thanks|thank you|best|cheers|sincerely|warm(ly)?|talk soon|looking forward|yours|team)\b/i;
+    // A short line with no sentence-ending punctuation looks like a name/title line.
+    const looksLikeSigLine = (t: string) =>
+      t.length <= 60 && !/[.!?:]$/.test(t) && t.split(/\s+/).length <= 8;
+
+    let sigStart = -1;
+    // 1) Explicit sign-off phrase on a short line — signature runs to the end.
+    //    Requiring a short line avoids matching body sentences like
+    //    "Thanks for visiting." that merely contain a sign-off word.
+    for (let i = gIdx + 1; i < blocks.length; i++) {
+      const t = textOf(blocks[i]);
+      if (SIGN_OFF.test(t) && looksLikeSigLine(t)) {
+        sigStart = i;
         break;
       }
     }
+    // 2) Fallback: trailing short name/title lines (e.g. "Aakriti Nirvan" /
+    //    "Head of Partnerships, Neoflo") with no closing keyword.
+    if (sigStart === -1) {
+      const last = blocks.length - 1;
+      if (last > gIdx && looksLikeSigLine(textOf(blocks[last]))) {
+        let start = last;
+        while (start - 1 > gIdx && looksLikeSigLine(textOf(blocks[start - 1]))) {
+          start--;
+        }
+        sigStart = start;
+      }
+    }
 
-    const bodyEnd = sIdx === -1 ? blocks.length : sIdx;
+    const bodyEnd = sigStart === -1 ? blocks.length : sigStart;
     const bodyBlocks = blocks.slice(gIdx + 1, bodyEnd);
+    const sigBlocks = sigStart === -1 ? [] : blocks.slice(sigStart);
 
     const greeting = textOf(blocks[gIdx]);
     const body = bodyBlocks.map(textOf).filter(Boolean).join("\n\n");
-    const signature = sIdx === -1 ? "" : textOf(blocks[sIdx]);
+    const signature = sigBlocks.map(textOf).filter(Boolean).join("\n");
 
     // Inject placeholders back into the HTML.
     blocks[gIdx].textContent = "{{greeting}}";
@@ -86,7 +105,10 @@ function parseHtmlTemplate(html: string): {
       bodyBlocks[0].textContent = "{{body}}";
       bodyBlocks.slice(1).forEach((el) => el.remove());
     }
-    if (sIdx !== -1) blocks[sIdx].textContent = "{{signature}}";
+    if (sigBlocks.length > 0) {
+      sigBlocks[0].textContent = "{{signature}}";
+      sigBlocks.slice(1).forEach((el) => el.remove());
+    }
 
     return {
       html: "<!DOCTYPE html>" + doc.documentElement.outerHTML,
