@@ -415,11 +415,20 @@ export default function SettingsPage() {
                     />
                   </Field>
                   {event.template.customHtml ? (
-                    <p className="text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-md px-3 py-2">
-                      Your whole email — greeting, body, buttons, and signature —
-                      lives in the uploaded HTML. Only {"{{name}}"} and {"{{company}}"}{" "}
-                      are filled in per contact. Remove the template to edit fields here.
-                    </p>
+                    <Field
+                      label="Body (HTML)"
+                      hint="the full email — edit freely; {{name}} / {{company}} fill in per contact"
+                    >
+                      <textarea
+                        value={event.template.customHtml}
+                        onChange={(e) =>
+                          updateTemplate(event.id, { customHtml: e.target.value })
+                        }
+                        rows={16}
+                        spellCheck={false}
+                        className={`${inputCls} resize-y font-mono text-xs leading-relaxed`}
+                      />
+                    </Field>
                   ) : (
                     <>
                       <Field label="Greeting">
